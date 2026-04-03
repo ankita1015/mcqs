@@ -22,7 +22,7 @@ import streamlit as st
 # Configuration
 # ---------------------------------------------------------------------------
 
-API_BASE_URL = "http://localhost:8000"
+API_BASE_URL = "https://mcqs-ehex.onrender.com"
 
 # Seconds allocated per question
 SECONDS_PER_QUESTION = 30
