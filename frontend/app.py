@@ -21,8 +21,9 @@ import streamlit as st
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-
+# 
 API_BASE_URL = "https://mcqs-ehex.onrender.com"
+# API_BASE_URL = "http://localhost:8000"
 
 # Seconds allocated per question
 SECONDS_PER_QUESTION = 30
@@ -73,6 +74,10 @@ html, body, [class*="css"] {
     font-family: 'Inter', sans-serif !important;
     background-color: var(--bg-primary) !important;
     color: var(--text-primary) !important;
+    overflow-x: hidden !important;
+}
+[data-testid="stAppViewContainer"] {
+    overflow-x: hidden !important;
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────────── */
@@ -173,25 +178,42 @@ html, body, [class*="css"] {
 }
 
 /* ── Radio buttons ───────────────────────────────────────────────── */
+/* ── Radio buttons (Options) ─────────────────────────────────────── */
+[data-testid="stRadio"] > div {
+    gap: 0.75rem !important;
+}
 [data-testid="stRadio"] label {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 0.75rem 1.2rem;
-    margin-bottom: 0.5rem;
-    display: block;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: var(--text-primary) !important;
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 0.85rem 1.25rem !important;
+    margin-bottom: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    min-height: 3.5rem !important; /* Uniform height for all options */
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
 }
 [data-testid="stRadio"] label:hover {
-    background: var(--bg-card-hover);
-    border-color: var(--accent);
-    transform: translateX(4px);
+    background: var(--bg-card-hover) !important;
+    border-color: var(--accent) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(108, 99, 255, 0.2) !important;
+}
+/* Selected state highlight using :has if supported, otherwise focus-within */
+[data-testid="stRadio"] label:has(input:checked),
+[data-testid="stRadio"] label:focus-within {
+    background: rgba(108, 99, 255, 0.12) !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 20px var(--accent-glow) !important;
+    border-width: 2px !important;
 }
 [data-testid="stRadio"] [data-testid="stMarkdownContainer"] p {
     color: var(--text-primary) !important;
-    font-size: 0.95rem !important;
+    font-size: 1.05rem !important;
+    font-weight: 500 !important;
+    margin: 0 !important;
 }
 
 /* ── Selectbox & number input ─────────────────────────────────────── */
@@ -256,15 +278,27 @@ html, body, [class*="css"] {
 .score-label { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
 
 /* ── Stat boxes ───────────────────────────────────────────────────── */
+.stats-container {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+}
 .stat-box {
-    background: var(--bg-card);
+    flex: 1;
+    background: var(--bg-secondary);
     border-radius: var(--radius-sm);
-    padding: 1rem;
+    padding: 0.75rem 0.5rem;
     text-align: center;
     border: 1px solid var(--border);
+    transition: transform 0.2s ease;
 }
-.stat-val { font-size: 1.8rem; font-weight: 700; }
-.stat-lbl { font-size: 0.8rem; color: var(--text-secondary); }
+.stat-box:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+}
+.stat-val { font-size: 1.5rem; font-weight: 800; line-height: 1.2; }
+.stat-lbl { font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
 /* ── Typography helpers ───────────────────────────────────────────── */
 h1, h2, h3 { color: var(--text-primary) !important; }
@@ -286,6 +320,95 @@ hr {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-primary); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Mobile Responsiveness ────────────────────────────────────────── */
+@media (max-width: 768px) {
+    /* Reduce card padding */
+    .mcq-card {
+        padding: 1.25rem 1.5rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Compact sticky header */
+    .sticky-header {
+        padding: 0.5rem 1rem !important;
+        border-radius: 0 !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .sticky-header div:first-child span:first-child {
+        font-size: 0.9rem !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        max-width: 160px;
+    }
+    
+    .subtitle {
+        font-size: 0.75rem !important;
+        margin-left: 0 !important;
+    }
+    
+    .timer-badge {
+        font-size: 0.9rem !important;
+        padding: 0.25rem 0.75rem !important;
+    }
+
+    /* Score circle scaling */
+    .score-circle {
+        width: 120px !important;
+        height: 120px !important;
+    }
+    .score-pct { font-size: 1.8rem !important; }
+
+    /* Fix for buttons stacking on mobile */
+    [data-testid="stHorizontalBlock"] {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 0.5rem !important;
+    }
+    [data-testid="column"] {
+        flex: 1 1 0% !important;
+        min-width: 0 !important;
+    }
+    
+    .stButton > button {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.85rem !important;
+        width: 100% !important;
+    }
+
+    /* Prevent horizontal scroll while keeping columns horizontal */
+    [data-testid="stHorizontalBlock"] {
+        flex-direction: row !important;
+        flex-wrap: wrap !important; /* Allow wrapping if needed */
+        gap: 0.25rem !important;
+        width: 100% !important;
+    }
+    
+    [data-testid="column"] {
+        flex: 1 1 0% !important;
+        min-width: 100px !important; /* Minimum width for buttons */
+        padding: 0 !important;
+    }
+
+    /* Force stats to stack vertically on mobile for better visibility */
+    .stats-container {
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+        margin-top: 1.5rem !important;
+    }
+    .stat-box {
+        padding: 1rem !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        text-align: left !important;
+    }
+    .stat-val { font-size: 1.5rem !important; margin-left: 10px; }
+    .stat-lbl { font-size: 0.8rem !important; margin: 0; }
+}
 </style>
 """,
     unsafe_allow_html=True,
@@ -366,15 +489,25 @@ def render_sidebar() -> None:
     with st.sidebar:
         st.markdown(
             """
-            <div style='text-align:center; padding: 1rem 0 0.5rem;'>
-                <span style='font-size:2.5rem;'>🎓</span>
-                <h2 style='margin:0; font-size:1.3rem; font-weight:700;'>MCQ Exam Generator</h2>
-                <p style='color:var(--text-secondary); font-size:0.8rem; margin:0;'>Powered by Groq + Llama 3</p>
+            <div style='text-align:center; padding: 1.5rem 0 0.5rem;'>
+                <span style='font-size:2.8rem;'>🎓</span>
+                <h2 style='margin:0; font-size:1.4rem; font-weight:800;'>MCQ Portal</h2>
+                <p style='color:var(--text-secondary); font-size:0.8rem; margin:0;'>MPSC Exam Engine</p>
             </div>
             <hr/>
             """,
             unsafe_allow_html=True,
         )
+
+        if st.session_state.phase != "setup":
+            st.markdown("### 🎯 Current Exam")
+            st.write(f"**PDF**: {st.session_state.pdf_name}")
+            st.write(f"**Difficulty**: {st.session_state.difficulty}")
+            st.markdown("<br/>", unsafe_allow_html=True)
+            if st.button("❌ Quit Exam", use_container_width=True):
+                _reset_exam()
+                st.rerun()
+            return
 
         # --- PDF Upload ---
         st.markdown("**📄 Upload PDF**")
@@ -576,46 +709,41 @@ def render_exam_page() -> None:
     minutes, seconds = divmod(int(remaining), 60)
 
     # ── Auto-submit when timer hits 0 ──────────────────────────────────────
-    if remaining == 0 and not st.session_state.submitted:
+    if remaining <= 0 and not st.session_state.submitted:
         st.session_state.phase = "results"
         st.session_state.submitted = True
         st.rerun()
 
     # ── Timer colour ────────────────────────────────────────────────────────
     pct_remaining = remaining / max(1, st.session_state.total_seconds)
-    if pct_remaining > 0.5:
-        timer_cls = "safe"
-    elif pct_remaining > 0.2:
-        timer_cls = "warning"
-    else:
-        timer_cls = ""
+    timer_cls = "safe" if pct_remaining > 0.5 else ("warning" if pct_remaining > 0.2 else "")
 
-    # ── Sticky header ───────────────────────────────────────────────────────
+    # ── Sticky header (Integrated Progress) ─────────────────────────────────
+    answered_count = len(st.session_state.answers)
+    progress = answered_count / total
     st.markdown(
         f"""
         <div class='sticky-header'>
-            <div>
-                <span style='font-weight:700; font-size:1rem;'>📝 {st.session_state.pdf_name}</span>
-                <span class='subtitle' style='margin-left:12px;'>
+            <div style='flex: 1;'>
+                <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;'>
+                    <span style='font-weight:700; font-size:0.95rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;'>
+                        📝 {st.session_state.pdf_name}
+                    </span>
+                    <div class='timer-badge {timer_cls}'>
+                        ⏱ {minutes:02d}:{seconds:02d}
+                    </div>
+                </div>
+                <div class='subtitle' style='font-size:0.75rem; margin-bottom: 6px;'>
                     Question {idx + 1} of {total} · {st.session_state.difficulty}
-                </span>
-            </div>
-            <div class='timer-badge {timer_cls}'>
-                ⏱ {minutes:02d}:{seconds:02d}
+                </div>
+                <div style='width: 100%; height: 4px; background: var(--bg-secondary); border-radius: 2px; overflow: hidden;'>
+                    <div style='width: {progress*100}%; height: 100%; background: var(--accent); transition: width 0.3s ease;'></div>
+                </div>
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
-
-    # ── Progress bar ────────────────────────────────────────────────────────
-    answered_count = len(st.session_state.answers)
-    st.markdown(
-        f"<div class='subtitle' style='margin-bottom:4px;'>"
-        f"Answered: {answered_count}/{total}</div>",
-        unsafe_allow_html=True,
-    )
-    st.progress(answered_count / total)
     st.markdown("<br/>", unsafe_allow_html=True)
 
     # ── Question card ───────────────────────────────────────────────────────
@@ -623,95 +751,68 @@ def render_exam_page() -> None:
     st.markdown(
         f"""
         <div class='mcq-card'>
-            <div class='subtitle' style='margin-bottom:0.5rem;'>
-                Question {idx + 1} <span style='opacity:0.4;'>/ {total}</span>
+            <div style='display: flex; justify-content: space-between; margin-bottom: 0.75rem;'>
+                <span class='pill-neutral answer-pill' style='font-size: 0.7rem;'>QUESTION {idx + 1}</span>
+                <span style='opacity: 0.4; font-size: 0.8rem;'>{idx + 1} / {total}</span>
             </div>
-            <h2 style='font-size:1.25rem; font-weight:600; margin:0;'>
+            <h2 style='font-size:1.15rem; font-weight:600; line-height:1.5; margin:0;'>
                 {mcq["question"]}
             </h2>
         </div>
         """,
         unsafe_allow_html=True,
     )
-
     # ── Options ─────────────────────────────────────────────────────────────
     options: List[str] = mcq["options"]
     option_letters = [opt.split(".")[0].strip() for opt in options]
 
     current_answer = st.session_state.answers.get(idx)
-    default_idx = (
-        option_letters.index(current_answer)
-        if current_answer in option_letters
-        else None
-    )
+    default_idx = option_letters.index(current_answer) if current_answer in option_letters else None
 
     selected_option = st.radio(
-        "Select your answer:",
+        label="Options",
         options=options,
         index=default_idx,
         key=f"radio_{idx}",
         label_visibility="collapsed",
     )
 
-    # Save the answer (letter only)
+    # Save the answer
     if selected_option:
-        letter = selected_option.split(".")[0].strip()
-        st.session_state.answers[idx] = letter
+        st.session_state.answers[idx] = selected_option.split(".")[0].strip()
 
     st.markdown("<br/>", unsafe_allow_html=True)
 
-    # ── Navigation ──────────────────────────────────────────────────────────
-    nav_col1, nav_col2, nav_col3 = st.columns([1, 2, 1])
+    # ── Navigation Row ──────────────────────────────────────────────────────
+    nav_col1, nav_col2, nav_col3 = st.columns([1.2, 1, 1.2])
 
     with nav_col1:
-        if idx > 0:
-            if st.button("← Previous", key="btn_prev"):
-                st.session_state.current_idx -= 1
-                st.rerun()
+        if st.button("← Previous", key="btn_prev", use_container_width=True, disabled=idx == 0):
+            st.session_state.current_idx -= 1
+            st.rerun()
 
     with nav_col2:
-        # Question dot indicators (up to 20 shown)
+        # Mini dots (up to 10)
         dots_html = ""
-        display_total = min(total, 20)
+        display_total = min(total, 10)
         for i in range(display_total):
-            if i == idx:
-                color = "#6c63ff"
-            elif i in st.session_state.answers:
-                color = "#22c55e"
-            else:
-                color = "#374151"
-            dots_html += (
-                f"<span style='display:inline-block; width:10px; height:10px; "
-                f"border-radius:50%; background:{color}; margin:2px; cursor:pointer;' "
-                f"title='Q{i+1}'></span>"
-            )
-        if total > 20:
-            dots_html += f" <span class='subtitle'>+{total - 20} more</span>"
-        st.markdown(
-            f"<div style='text-align:center; padding-top:8px;'>{dots_html}</div>",
-            unsafe_allow_html=True,
-        )
+            color = "#6c63ff" if i == idx else ("#22c55e" if i in st.session_state.answers else "#374151")
+            dots_html += f"<span style='display:inline-block; width:8px; height:8px; border-radius:50%; background:{color}; margin:2px;'></span>"
+        st.markdown(f"<div style='text-align:center; padding-top:10px;'>{dots_html}</div>", unsafe_allow_html=True)
 
     with nav_col3:
         if idx < total - 1:
-            # Require answer check
-            can_proceed = True
-            if st.session_state.require_answer and idx not in st.session_state.answers:
-                can_proceed = False
-
-            if st.button("Next →", key="btn_next", disabled=not can_proceed):
+            can_proceed = not st.session_state.require_answer or idx in st.session_state.answers
+            if st.button("Next →", key="btn_next", disabled=not can_proceed, use_container_width=True):
                 st.session_state.current_idx += 1
                 st.rerun()
-            if not can_proceed:
-                st.caption("⚠️ Please select an answer first.")
         else:
-            if st.button("✅ Submit Exam", key="btn_submit", type="primary"):
+            if st.button("Submit ✅", key="btn_submit", type="primary", use_container_width=True):
                 st.session_state.phase = "results"
                 st.session_state.submitted = True
                 st.rerun()
 
-    # ── Auto-refresh for timer ───────────────────────────────────────────────
-    # Rerun every second to keep the countdown ticking
+    # ── Timer auto-refresh ──────────────────────────────────────────────────
     time.sleep(1)
     st.rerun()
 
@@ -769,31 +870,25 @@ def render_results_page() -> None:
         )
 
     with stats_col:
-        s1, s2, s3 = st.columns(3)
-        with s1:
-            st.markdown(
-                f"""<div class='stat-box'>
+        st.markdown(
+            f"""
+            <div class='stats-container'>
+                <div class='stat-box' style='border-top: 3px solid #22c55e;'>
                     <div class='stat-val' style='color:#22c55e;'>{correct_count}</div>
                     <div class='stat-lbl'>Correct ✅</div>
-                </div>""",
-                unsafe_allow_html=True,
-            )
-        with s2:
-            st.markdown(
-                f"""<div class='stat-box'>
+                </div>
+                <div class='stat-box' style='border-top: 3px solid #ef4444;'>
                     <div class='stat-val' style='color:#ef4444;'>{wrong_count}</div>
                     <div class='stat-lbl'>Wrong ❌</div>
-                </div>""",
-                unsafe_allow_html=True,
-            )
-        with s3:
-            st.markdown(
-                f"""<div class='stat-box'>
+                </div>
+                <div class='stat-box' style='border-top: 3px solid #f59e0b;'>
                     <div class='stat-val' style='color:#f59e0b;'>{skipped_count}</div>
                     <div class='stat-lbl'>Skipped ⏭️</div>
-                </div>""",
-                unsafe_allow_html=True,
-            )
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
         # Performance message
         st.markdown("<br/>", unsafe_allow_html=True)
@@ -895,6 +990,34 @@ def render_results_page() -> None:
 
 
 def main() -> None:
+    # ── Debug Mode (Preview UI) ───────────────────────────────────────────
+    query_params = st.query_params
+    if "debug" in query_params:
+        debug_mode = query_params["debug"]
+        if debug_mode == "exam" and st.session_state.phase == "setup":
+            st.session_state.phase = "exam"
+            st.session_state.pdf_name = "Debug_Exam.pdf"
+            st.session_state.difficulty = "Medium"
+            st.session_state.mcqs = [{
+                "question": "Which component of the plant cell is primarily responsible for photosynthesis?",
+                "options": ["A. Mitochondria", "B. Chloroplast", "C. Nucleus", "D. Ribosome"],
+                "correct_answer": "B",
+                "explanation": "Chloroplasts are the organelles in plant cells that carry out photosynthesis."
+            }] * 5
+            st.session_state.exam_start_time = time.time()
+            st.session_state.total_seconds = 30 * 5
+        elif debug_mode == "results" and st.session_state.phase == "setup":
+            st.session_state.phase = "results"
+            st.session_state.pdf_name = "Debug_Results.pdf"
+            st.session_state.mcqs = [{
+                "question": "Which component of the plant cell is primarily responsible for photosynthesis?",
+                "options": ["A. Mitochondria", "B. Chloroplast", "C. Nucleus", "D. Ribosome"],
+                "correct_answer": "B",
+                "explanation": "Chloroplasts are the organelles in plant cells that carry out photosynthesis."
+            }]
+            st.session_state.answers = {0: "A"}  # Wrong answer
+            st.session_state.submitted = True
+
     render_sidebar()
 
     phase = st.session_state.phase
