@@ -1,0 +1,19 @@
+# ── Core ─────────────────────────────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9        # required for FastAPI file uploads
+
+# ── PDF Parsing ───────────────────────────────────────────────────────────────
+pdfplumber>=0.11.0             # primary parser (handles complex layouts)
+PyPDF2>=3.0.0                  # fallback parser
+
+# ── AI / Groq (uses OpenAI-compatible SDK) ────────────────────────────────────
+openai>=1.30.0                 # OpenAI SDK used as Groq client (same interface)
+
+# ── Frontend ─────────────────────────────────────────────────────────────────
+streamlit>=1.35.0
+requests>=2.31.0
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0           # load .env in development
+pydantic>=2.0.0                # data validation (bundled with FastAPI)
